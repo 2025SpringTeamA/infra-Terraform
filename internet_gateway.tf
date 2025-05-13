@@ -5,6 +5,6 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id  # 接続対象の VPC を指定
 
   tags = {
-    Name = "Terraform-igw"  # 識別用のタグを設定
+    Name = "${var.project_prefix}-igw"  # 識別用のタグを設定
   }
 }
