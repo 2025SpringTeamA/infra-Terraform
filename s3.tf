@@ -1,44 +1,55 @@
 # S3 バケットおよびファイルアップロードの定義  
-# ウェブホスティング設定とバケットポリシーを含めた構成
+# 所有権制御やバケットポリシーを含めた構成
 
 # S3 バケットの定義（CloudFront 経由でアクセスするためのバケット）
-resource "aws_s3_bucket" "my_bucket" {
-  bucket = "my-cloudfront-bucket-tokyo"
-  acl    = "private"
+resource "aws_s3_bucket" "frontend_bucket" {
+  bucket = var.s3_bucket_name
 
   tags = {
-    Name        = "MyS3Bucket"
+    Name        = "${var.project_prefix}-saburo-frontend"
     Environment = "Production"
   }
 }
 
-# バケットのウェブホスティング設定
-resource "aws_s3_bucket_website_configuration" "my_bucket_website" {
-  bucket = aws_s3_bucket.my_bucket.id
+# 所有権制御の設定(ACLを無効化)
+resource "aws_s3_bucket_ownership_controls" "frontend" {
+  bucket = aws_s3_bucket.frontend_bucket.id
 
-  index_document {
-    suffix = "index.html"
-  }
-
-  error_document {
-    key = "error.html"
+  rule {
+    object_ownership = "BucketOwnerEnforced"
   }
 }
 
-# バケットポリシー（OAI のみアクセス許可）
-resource "aws_s3_bucket_policy" "my_bucket_policy" {
-  bucket = aws_s3_bucket.my_bucket.id
+# パブリックアクセスブロックの設定
+resource "aws_s3_bucket_public_access_block" "frontend" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# バケットポリシー（OAC のみアクセス許可）
+resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
+  bucket = aws_s3_bucket.frontend_bucket.id
 
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
+        Sid = "AllowCloudFrontServicPrincipal",
         Effect = "Allow",
         Principal = {
-          AWS = aws_cloudfront_origin_access_identity.my_oai.iam_arn
+          Service = "cloudfront.amazonaws.com"
         },
         Action = "s3:GetObject",
-        Resource = "${aws_s3_bucket.my_bucket.arn}/*"
+        Resource = "${aws_s3_bucket.frontend_bucket.arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = var.cloudfront_distribution_arn
+          }
+        }      
       }
     ]
   })
