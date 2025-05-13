@@ -7,6 +7,6 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true                       # ホスト名の自動割り当てを有効化
 
   tags = {
-    Name = "Terraform-vpc"                          # VPC に名前タグを付与
+    Name = "${var.project_prefix}-vpc"              # VPC に名前タグを付与
   }
 }
