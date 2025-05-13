@@ -3,12 +3,12 @@
 
 # ECS クラスターの定義（Fargate でアプリケーションを実行）
 resource "aws_ecs_cluster" "main" {
-  name = "my-ecs-cluster"
+  name = "${var.project_prefix}-ecs-cluster"
 }
 
 # ECS タスク実行ロールの定義（タスクが必要な AWS サービスへアクセスするための IAM ロール）
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecs-task-execution-role"
+  name = "${var.project_prefix}-ecs-task-execution-role"
 
   # ECS タスクがこのロールを引き受けるための信頼ポリシー
   assume_role_policy = jsonencode({
@@ -23,10 +23,11 @@ resource "aws_iam_role" "ecs_task_execution_role" {
       }
     ]
   })
+}
 
-  # タスク実行時に必要な操作を許可するインラインポリシー
-  inline_policy {
-    name = "ecs-task-execution-policy"
+  # タスク実行時に必要な操作を許可するIAMポリシー
+  resource "aws_iam_policy" "ecs_task_execution_policy" {
+    name = "${var.project_prefix}-ecs-task-execution-policy"
 
     policy = jsonencode({
       Version = "2012-10-17",
@@ -39,18 +40,24 @@ resource "aws_iam_role" "ecs_task_execution_role" {
             "ecr:BatchGetImage",
             "logs:CreateLogStream",
             "logs:PutLogEvents",
-            "s3:GetObject"
+            "s3:GetObject",
+            "secretsmanager:GetSecretValue"
           ],
           Resource = "*"
         }
       ]
     })
   }
-}
 
-# ECS タスク定義（Fargate で動作するコンテナの定義）
+  # ECS タスク実行ロールにポリシーをアタッチ
+  resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy_attachment" {
+    role       = aws_iam_role.ecs_task_execution_role.name
+    policy_arn = aws_iam_policy.ecs_task_execution_policy.arn
+  }
+
+# ECS タスク定義（Fargate: init-datadog → datadog-agent → DB Migration → FastAPI App）
 resource "aws_ecs_task_definition" "main" {
-  family                   = "my-app-task"
+  family                   = "${var.project_prefix}-saburo-app-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -59,22 +66,134 @@ resource "aws_ecs_task_definition" "main" {
 
   container_definitions = jsonencode([
     {
-      name  = "my-app-repo",
-      image = "881490128743.dkr.ecr.ap-northeast-1.amazonaws.com/my-app-repo",
+      name         = "init-datadog",
+      image        = "datadog/cws-instrumentation:latest",
+      essential    = false,
+      command      = ["/cws-instrumentation", "setup", "--cws-volume-mount", "/cws-instrumentation-volume"],
+      mountPoints  = [{
+        sourceVolume  = "cws-instrumentation-volume",
+        containerPath = "/cws-instrumentation-volume",
+        readOnly      = false
+      }],
+      user         = "0",
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = "/ecs/datadog",
+          awslogs-region        = "ap-northeast-1",
+          awslogs-stream-prefix = "cws-instrumentation-init"
+        }
+      }
+    },
+    {
+      name        = "datadog-agent",
+      image       = "datadog/agent:latest",
+      essential   = true,
+      environment = [
+        { name = "DD_CONTAINER_METRICS_ENABLED", value = "true" },
+        { name = "DD_API_KEY", value = var.datadog_api_key },
+        { name = "DD_SITE", value = "ap1.datadoghq.com" },
+        { name = "ECS_FARGATE", value = "true" }
+      ],
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = "/ecs/datadog",
+          awslogs-region        = "ap-northeast-1",
+          awslogs-stream-prefix = "datadog-agent"
+      }
+    },
+    healthCheck = {
+      command     = ["CMD-SHELL", "/probe.sh"],
+      interval    = 30,
+      timeout     = 5,
+      retries     = 2,
+      startPeriod = 60
+    }
+  },
+  {
+      name           = "DB Migration",
+      image          = "${var.ecr_image_uri}:latest",
+      essential      = false,
+      entryPoint     = ["/bin/sh", "-c"],
+      command        = ["cd /app && alembic upgrade head"],
+      secrets = [
+        { name = "MYSQL_ROOT_PASSWORD", valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_ROOT_PASSWORD::" },
+        { name = "MYSQL_DATABASE", valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_DATABASE::" },
+        { name = "MYSQL_USER",     valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_USER::" },
+        { name = "MYSQL_PASSWORD", valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_PASSWORD::" },
+        { name = "DATABASE_URL",   valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:DATABASE_URL::" }
+      ],
+      dependsOn = [
+        {
+          containerName = "datadog-agent",
+          condition     = "HEALTHY"
+        }
+      ],
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = "/ecs/datadog",
+          awslogs-region        = "ap-northeast-1",
+          awslogs-stream-prefix = "db-migration"
+        }
+      }
+    },
+    {
+      name  = "FastAPI App",
+      image = "${var.ecr_image_uri}:latest",
+      essential = true,
       portMappings = [
         {
-          containerPort = 1323,
-          hostPort      = 1323,
+          containerPort = 8000,
+          hostPort      = 8000,
           protocol      = "tcp"
         }
-      ]
+      ],
+      command = ["uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info"],
+      dependsOn = [
+        {
+          containerName = "datadog-agent",
+          condition     = "HEALTHY"
+        },
+        {
+          containerName = "init-datadog",
+          condition     = "SUCCESS"
+        },
+        {
+          containerName = "DB Migration",
+          condition     = "SUCCESS"
+        }
+      ],
+      mountPoints = [{
+        sourceVolume = "cws-instrumentation-volume",
+        containerPath = "/cws-instrumentation-volume",
+        readOnly = true
+      }],
+      linuxParameters = {
+        capabilities = {
+          add = ["SYS_PTRACE"]
+        }
+      },
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = "/ecs/datadog",
+          awslogs-region        = "ap-northeast-1",
+          awslogs-stream-prefix = "fastapi-app"
+        }
+      }
     }
   ])
+
+  volume {
+    name = "cws-instrumentation-volume"
+  }
 }
 
 # ECS サービスの定義（Fargate でアプリケーションを実行し、ALB に登録）
 resource "aws_ecs_service" "main" {
-  name            = "my-ecs-service"
+  name            = "${var.project_prefix}-ecs-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.main.arn
   desired_count   = 1
@@ -90,7 +209,33 @@ resource "aws_ecs_service" "main" {
   # ALB にコンテナを登録（ターゲットグループ連携）
   load_balancer {
     target_group_arn = aws_lb_target_group.main_target_group.arn
-    container_name   = "my-app-repo"
-    container_port   = 1323
+    container_name   = "FastAPI App"
+    container_port   = 8000
+  }
+}
+
+# ECS サービスの Auto Scaling 定義（CPU 使用率に基づいてスケールイン/スケールアウト）
+resource "aws_appautoscaling_target" "ecs_service_target" {
+  max_capacity       = 4
+  min_capacity       = 1
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.main.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "cpu_scaling" {
+  name                  = "${var.project_prefix}-cpu-scaling-policy"
+  policy_type           = "TargetTrackingScaling"
+  resource_id           = aws_appautoscaling_target.ecs_service_target.resource_id
+  scalable_dimension    = aws_appautoscaling_target.ecs_service_target.scalable_dimension
+  service_namespace     = aws_appautoscaling_target.ecs_service_target.service_namespace
+  
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    target_value       = 50.0
+    scale_in_cooldown  = 60
+    scale_out_cooldown = 60
   }
 }
