@@ -6,7 +6,7 @@ resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "Terraform-rtb-public"
+    Name = "${var.project_prefix}-rtb-public"
   }
 }
 
