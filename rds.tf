@@ -31,7 +31,7 @@ resource "aws_db_instance" "rds_instance" {
 
   # 認証情報
   username = "admin"
-  password = jsondecode(data.aws_secretsmanager_secret_version.rds_password_v2.secret_string)["password"]
+  password = jsondecode(data.aws_secretsmanager_secret_version.rds_credentials.secret_string)["MYSQL_PASSWORD"]
 
   # サブネットとセキュリティグループの設定
   db_subnet_group_name    = aws_db_subnet_group.rds_subnet_group.name
