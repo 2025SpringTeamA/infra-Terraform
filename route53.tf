@@ -11,8 +11,8 @@ resource "aws_route53_record" "saburo_cloudfront_primary" {
   set_identifier = "cloudfront-primary"
 
   alias {
-    name                   = aws_cloudfront_distribution.my_distribution.domain_name
-    zone_id                = aws_cloudfront_distribution.my_distribution.hosted_zone_id
+    name                   = aws_cloudfront_distribution.saburo_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.saburo_distribution.hosted_zone_id
     evaluate_target_health = true
   }
 
@@ -29,7 +29,7 @@ resource "aws_route53_record" "maintenance_failover" {
   set_identifier = "maintenance-backup"
 
   alias {
-    name                   = aws_s3_bucket.maintenance_bucket.website_endpoint
+    name                   = "saburo-maintenance.s3-website-ap-northeast-1.amazonaws.com"
     zone_id                = "Z3AQBSTGFYJSTF"  # S3 静的ホスティング用固定ゾーンID
     evaluate_target_health = false
   }
