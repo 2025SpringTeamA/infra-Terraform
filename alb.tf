@@ -6,7 +6,7 @@ resource "aws_lb" "main_alb" {
   name               = "${var.project_prefix}-main-alb"
   internal           = false                               # パブリック ALB として構成
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.public_sg.id]   # ALB に適用するセキュリティグループ
+  security_groups    = [aws_security_group.alb_sg.id]   # ALB に適用するセキュリティグループ
   subnets            = [
     aws_subnet.public1.id,
     aws_subnet.public2.id
