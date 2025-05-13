@@ -1,41 +1,45 @@
 # CloudFront ディストリビューションの定義  
-# OAI（オリジンアクセスアイデンティティ）を使用して、S3 バケットへのセキュアなアクセスを構成
+# OAC（オリジンアクセスコントロール）を使用して、S3 バケットへのセキュアなアクセスを構成
 
-# CloudFront OAI の定義
-resource "aws_cloudfront_origin_access_identity" "my_oai" {
-  comment = "OAI for S3 bucket"
+# CloudFront OAC の定義
+resource "aws_cloudfront_origin_access_control" "frontend_oac" {
+  name                       = "${var.project_prefix}-frontend-oac"
+  description                = "OAC for saburo-frontend S3 bucket access"  
+  origin_access_control_origin_type = "s3"
+  signing_behavior           = "always"
+  signing_protocol           = "sigv4"
 }
 
 # CloudFront ディストリビューションの定義
-resource "aws_cloudfront_distribution" "my_distribution" {
+resource "aws_cloudfront_distribution" "saburo_distribution" {
   origin {
-    domain_name = aws_s3_bucket.my_bucket.bucket_regional_domain_name
-    origin_id   = "S3-my-cloudfront-bucket"
-    origin_path = "/client"
+    domain_name              = aws_s3_bucket.frontend_bucket.bucket_regional_domain_name
+    origin_id                = "${var.project_prefix}-saburo-frontend-origin"
 
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.my_oai.cloudfront_access_identity_path
-    }
+    origin_access_control_id = aws_cloudfront_origin_access_control.frontend_oac.id
   }
 
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = "CloudFront Distribution for S3 bucket in Tokyo region"
+  comment             = "CloudFront distribution for saburo.xyz"
   default_root_object = "index.html"
 
   default_cache_behavior {
+    target_origin_id = "${var.project_prefix}-saburo-frontend-origin"
     allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "S3-my-cloudfront-bucket"
-
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
-
     viewer_protocol_policy = "redirect-to-https"
+
+    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88638b6c3d" # CachingOptimized
+    origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"  # None (no query/header
+  }
+
+  # カスタムエラーレスポンス（メンテナンス用）
+  custom_error_response {
+    response_code         = 200
+    error_code            = 503
+    response_page_path    = "/503.html"
+    error_caching_min_ttl = 60
   }
 
   restrictions {
@@ -47,15 +51,15 @@ resource "aws_cloudfront_distribution" "my_distribution" {
   price_class = "PriceClass_100"
 
   viewer_certificate {
-    acm_certificate_arn      = "arn:aws:acm:us-east-1:xxx"
+    acm_certificate_arn      = var.acm_certificate_arn_us_east_1
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
 
-  aliases = ["honda333.blog"]
+  aliases = ["saburo.xyz"]
 
   tags = {
-    Name        = "MyCloudFrontDistribution"
+    Name        = "${var.project_prefix}-saburo-cloudfront"
     Environment = "Production"
   }
 }
