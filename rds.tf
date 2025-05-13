@@ -14,6 +14,11 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
   }
 }
 
+# Secrets Manager から既存のシークレット情報を取得
+data "aws_secretsmanager_secret_version" "rds_credentials" {
+  secret_id = "prod/saburo-fastapi/db-credentials"
+}
+
 # RDS インスタンスの定義（MySQL 8.0）
 resource "aws_db_instance" "rds_instance" {
   identifier           = "${var.project_prefix}-rds"
