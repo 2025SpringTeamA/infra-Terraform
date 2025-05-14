@@ -38,16 +38,3 @@ resource "aws_route53_record" "maintenance_failover" {
     type = "SECONDARY"
   }
 }
-
-# Route 53 に ALB の Aレコードを追加(api.saburo.xyz)
-resource "aws_route53_record" "saburo_alb" {
-  zone_id = data.aws_route53_zone.saburo.zone_id
-  name    = "api.saburo.xyz"
-  type    = "A"
-
-  alias {
-    name                   = aws_lb.main_alb.dns_name
-    zone_id                = aws_lb.main_alb.zone_id
-    evaluate_target_health = true
-  }
-}
