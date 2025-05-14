@@ -212,6 +212,12 @@ resource "aws_ecs_service" "main" {
     container_name   = "fastapi-app"
     container_port   = 8000
   }
+
+  # ALBリスナー作成後に ECS サービスを作成する
+  depends_on = [
+    aws_lb_listener.http_listener,
+    aws_lb_listener.https_listener
+  ]
 }
 
 # ECS サービスの Auto Scaling 定義（CPU 使用率に基づいてスケールイン/スケールアウト）
