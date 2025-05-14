@@ -32,14 +32,9 @@ variable "datadog_api_key" {
   default     = "a11f02afd575da1c6ff3cf40a2e5deab"
 }
 
-# ECR リポジトリ名
-variable "ecr_repository_name" {
-  default = "prod-saburo-app"
-}
-
 # ECR リポジトリの URI を格納する変数
 variable "ecr_image_uri" {
-  default = "881490128743.dkr.ecr.ap-northeast-1.amazonaws.com/prod-saburo-app"
+  default = "881490128743.dkr.ecr.ap-northeast-1.amazonaws.com/saburo-fastapi"
 }
 
 # RDS インスタンスの DB 名
