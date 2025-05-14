@@ -33,7 +33,7 @@ resource "aws_route_table" "private1" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "Terraform-rtb-private1-ap-northeast-1a"
+    Name = "${var.project_prefix}-rtb-private1-ap-northeast-1a"
   }
 }
 
@@ -54,7 +54,7 @@ resource "aws_route_table" "private2" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "Terraform-rtb-private2-ap-northeast-1c"
+    Name = "${var.project_prefix}-rtb-private2-ap-northeast-1c"
   }
 }
 
@@ -74,7 +74,7 @@ resource "aws_route_table" "private3" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "Terraform-rtb-private3-ap-northeast-1a"
+    Name = "${var.project_prefix}-rtb-private3-ap-northeast-1a"
   }
 }
 
@@ -94,7 +94,7 @@ resource "aws_route_table" "private4" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "Terraform-rtb-private4-ap-northeast-1c"
+    Name = "${var.project_prefix}-rtb-private4-ap-northeast-1c"
   }
 }
 
