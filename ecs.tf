@@ -112,7 +112,7 @@ resource "aws_ecs_task_definition" "main" {
     }
   },
   {
-      name           = "DB Migration",
+      name           = "db-migration",
       image          = "${var.ecr_image_uri}:latest",
       essential      = false,
       entryPoint     = ["/bin/sh", "-c"],
@@ -140,7 +140,7 @@ resource "aws_ecs_task_definition" "main" {
       }
     },
     {
-      name  = "FastAPI App",
+      name  = "fastapi-app",
       image = "${var.ecr_image_uri}:latest",
       essential = true,
       portMappings = [
@@ -161,7 +161,7 @@ resource "aws_ecs_task_definition" "main" {
           condition     = "SUCCESS"
         },
         {
-          containerName = "DB Migration",
+          containerName = "db-migration",
           condition     = "SUCCESS"
         }
       ],
@@ -209,7 +209,7 @@ resource "aws_ecs_service" "main" {
   # ALB にコンテナを登録（ターゲットグループ連携）
   load_balancer {
     target_group_arn = aws_lb_target_group.main_target_group.arn
-    container_name   = "FastAPI App"
+    container_name   = "fastapi-app"
     container_port   = 8000
   }
 }
