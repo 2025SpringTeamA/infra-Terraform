@@ -14,11 +14,6 @@ variable "maintenance_bucket_name" {
   default = "saburo-maintenance"
 }
 
-# CloudFrontのディストリビューションを特定するためのARNを格納する変数
-variable "cloudfront_distribution_arn" {
-  description = "CloudFront distribution ARN used for OAC policy"
-}
-
 # CloudFront 用（バージニア北部）
 variable "acm_certificate_arn_us_east_1" {
   description = "ACM Certificate ARN for CloudFront in us-east-1"
@@ -44,7 +39,7 @@ variable "ecr_repository_name" {
 
 # ECR リポジトリの URI を格納する変数
 variable "ecr_image_uri" {
-  default = "881490128743.dkr.ecr.ap-northeast-1.amazonaws.com/prod-saburo-fastapi"
+  default = "881490128743.dkr.ecr.ap-northeast-1.amazonaws.com/prod-saburo-app"
 }
 
 # RDS インスタンスの DB 名
