@@ -70,6 +70,7 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
-data "aws_cloudfront_origin_request_policy" "none" {
-  name = "Managed-OriginRequestPolicy-None"
+# CloudFront オリジンリクエストポリシー（最小構成）
+data "aws_cloudfront_origin_request_policy" "minimal" {
+  name = "Managed-UserAgentRefererHeaders"
 }
