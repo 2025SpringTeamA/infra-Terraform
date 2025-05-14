@@ -30,8 +30,9 @@ resource "aws_cloudfront_distribution" "saburo_distribution" {
     cached_methods   = ["GET", "HEAD"]
     viewer_protocol_policy = "redirect-to-https"
 
-    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88638b6c3d" # CachingOptimized
-    origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"  # None (no query/header
+    # キャッシュポリシーの設定
+    cache_policy_id = data.aws_cloudfront_cache_policy.caching_optimized.id # CachingOptimized
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.none.id  # None (no query/header
   }
 
   # カスタムエラーレスポンス（メンテナンス用）
@@ -62,4 +63,13 @@ resource "aws_cloudfront_distribution" "saburo_distribution" {
     Name        = "${var.project_prefix}-saburo-cloudfront"
     Environment = "Production"
   }
+}
+
+# CloudFront キャッシュポリシーの定義
+data "aws_cloudfront_cache_policy" "caching_optimized" {
+  name = "Managed-CachingOptimized"
+}
+
+data "aws_cloudfront_origin_request_policy" "none" {
+  name = "Managed-OriginRequestPolicy-None"
 }
