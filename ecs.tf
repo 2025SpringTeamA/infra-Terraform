@@ -123,17 +123,22 @@ resource "aws_ecs_task_definition" "main" {
   name        = "datadog-agent",
   image       = "datadog/agent:latest",
   essential   = true,
+
+  secrets = [
+    { 
+      name = "DD_API_KEY", 
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/datadog-api-key-4w84iT:DD_API_KEY::" }
+  ],
   environment = [
-    { name = "DD_API_KEY", value = var.datadog_api_key },
-    { name = "DD_SITE", value = "ap1.datadoghq.com" },
-    { name = "ECS_FARGATE", value = "true" },
-    { name = "DD_CONTAINER_METRICS_ENABLED", value = "true" },
-    {name  = "DD_LOGS_ENABLED", value = "true"},
-    {name  = "DD_PROCESS_AGENT_ENABLED", value = "true"},
-    {name  = "DD_PROCESS_CONFIG_ENABLED", value = "true"},
-    {name  = "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL", value = "true"},
-    {name  = "DD_APM_ENABLED", value = "true"},
-    {name  = "DD_TRACE_ENABLED", value = "true"}
+    { name  = "DD_SITE", value = "ap1.datadoghq.com" },
+    { name  = "ECS_FARGATE", value = "true" },
+    { name  = "DD_CONTAINER_METRICS_ENABLED", value = "true" },
+    { name  = "DD_LOGS_ENABLED", value = "true"},
+    { name  = "DD_PROCESS_AGENT_ENABLED", value = "true"},
+    { name  = "DD_PROCESS_CONFIG_ENABLED", value = "true"},
+    { name  = "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL", value = "true"},
+    { name  = "DD_APM_ENABLED", value = "true"},
+    { name  = "DD_TRACE_ENABLED", value = "true"}
   ],
   logConfiguration = {
     logDriver = "awslogs",
