@@ -29,7 +29,7 @@ variable "acm_certificate_arn_ap_northeast_1" {
 # Datadog API Key
 variable "datadog_api_key" {
   description = "Datadog API Key"
-  default     = "a11f02afd575da1c6ff3cf40a2e5deab"
+  default     = "a79c67c6c-78bf-4cdb-b44e-24065e224352"
 }
 
 # ECR リポジトリの URI を格納する変数
@@ -40,4 +40,10 @@ variable "ecr_image_uri" {
 # RDS インスタンスの DB 名
 variable "rds_db_name" {
   default = "fastapi_db"
+}
+
+# Lambda Function用のIAMロール定義も追加
+variable "lambda_function_name" {
+  description = "Lambda function name for DB migration trigger"
+  default     = "db-migration-trigger"
 }
