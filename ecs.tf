@@ -126,8 +126,9 @@ resource "aws_ecs_task_definition" "main" {
 
   secrets = [
     { 
-      name = "DD_API_KEY", 
-      valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/datadog-IQUsil:DD_API_KEY::" }
+      name      = "DD_API_KEY", 
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/datadog-IQUsil:DD_API_KEY::" 
+    }
   ],
   environment = [
     { name  = "DD_SITE", value = "ap1.datadoghq.com" },
