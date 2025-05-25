@@ -21,23 +21,23 @@ resource "aws_route53_record" "saburo_cloudfront_primary" {
   }
 }
 
-# Route 53 に メンテナンス用 S3 のA レコード（Secondary）
-resource "aws_route53_record" "maintenance_failover" {
-  zone_id = data.aws_route53_zone.saburo.zone_id
-  name    = "saburo.xyz"
-  type    = "A"
-  set_identifier = "maintenance-backup"
+# # Route 53 に メンテナンス用 S3 のA レコード（Secondary）
+# resource "aws_route53_record" "maintenance_failover" {
+#   zone_id = data.aws_route53_zone.saburo.zone_id
+#   name    = "saburo.xyz"
+#   type    = "A"
+#   set_identifier = "maintenance-backup"
 
-  alias {
-    name                   = "saburo-maintenance.s3-website-ap-northeast-1.amazonaws.com"
-    zone_id                = "Z3AQBSTGFYJSTF"  # S3 静的ホスティング用固定ゾーンID
-    evaluate_target_health = false
-  }
+#   alias {
+#     name                   = aws_cloudfront_distribution.maintenance_distribution.domain_name
+#     zone_id                = aws_cloudfront_distribution.maintenance_distribution.hosted_zone_id
+#     evaluate_target_health = false
+#   }
 
-  failover_routing_policy {
-    type = "SECONDARY"
-  }
-}
+#   failover_routing_policy {
+#     type = "SECONDARY"
+#   }
+# }
 
 # API サブドメイン用の Route53 レコード
 resource "aws_route53_record" "api_subdomain" {
