@@ -3,10 +3,10 @@ output "ecs_cluster_name" {
   value       = aws_ecs_cluster.main.name
 }
 
-output "migration_task_definition_arn" {
-  description = "Migration task definition ARN for Lambda function"
-  value       = aws_ecs_task_definition.migration.arn
-}
+# output "migration_task_definition_arn" {
+#   description = "Migration task definition ARN for Lambda function"
+#   value       = aws_ecs_task_definition.migration.arn
+# }
 
 output "private_subnet_ids" {
   description = "Private subnet IDs for ECS RunTask"
