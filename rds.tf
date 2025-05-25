@@ -36,14 +36,16 @@ resource "aws_db_instance" "rds_instance" {
   # サブネットとセキュリティグループの設定
   db_subnet_group_name    = aws_db_subnet_group.rds_subnet_group.name
   vpc_security_group_ids  = [aws_security_group.rds_sg.id]
-
   publicly_accessible = false
   multi_az            = false
+
+  # パラメータグループとオプショングループの設定
+  parameter_group_name = var.rds_parameter_group_name
+  option_group_name    = var.rds_option_group_name
 
   tags = {
     Name = "${var.project_prefix}-rds-instance"
   }
 
-  # 削除時にスナップショットを作成しない
   skip_final_snapshot = true
 }
