@@ -189,6 +189,13 @@ resource "aws_ecs_task_definition" "main" {
       name  = "fastapi-app",
       image = "${var.ecr_image_uri}:latest",
       essential = true,
+
+      secrets = [
+        { 
+          name      = "ADMIN_PIN_CODE",
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/backend-credentials-xxxxxx:ADMIN_PIN_CODE::"
+        }
+      ],
       portMappings = [
         {
           containerPort = 8000,
