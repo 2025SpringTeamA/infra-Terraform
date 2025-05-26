@@ -196,7 +196,7 @@ resource "aws_ecs_task_definition" "main" {
           protocol      = "tcp"
         }
       ],
-      command = ["uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info"],
+      command = ["uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info"],
       dependsOn = [
         {
           containerName = "datadog-agent",
