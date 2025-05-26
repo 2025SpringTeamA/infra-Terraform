@@ -164,7 +164,7 @@ resource "aws_ecs_task_definition" "main" {
       entryPoint     = ["/bin/sh", "-c"],
       command        = ["cd /app && alembic upgrade head"],
       secrets = [
-        { name = "MYSQL_ROOT_PASSWORD", valueFrom =   "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_ROOT_PASSWORD::" },
+        { name = "MYSQL_ROOT_PASSWORD", valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_ROOT_PASSWORD::" },
         { name = "MYSQL_DATABASE", valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_DATABASE::" },
         { name = "MYSQL_USER",     valueFrom =  "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_USER::" },
         { name = "MYSQL_PASSWORD", valueFrom =  "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_PASSWORD::" },

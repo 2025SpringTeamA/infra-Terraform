@@ -30,7 +30,7 @@ resource "aws_db_instance" "rds_instance" {
   db_name              = var.rds_db_name
 
   # 認証情報
-  username = "admin"
+  username = jsondecode(data.aws_secretsmanager_secret_version.rds_credentials.secret_string)["MYSQL_USER"]
   password = jsondecode(data.aws_secretsmanager_secret_version.rds_credentials.secret_string)["MYSQL_PASSWORD"]
 
   # サブネットとセキュリティグループの設定
