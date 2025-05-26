@@ -198,7 +198,7 @@ resource "aws_ecs_task_definition" "main" {
       ],
       command: [
         "uvicorn",
-        "app.main:app",
+        "main:app",
         "--host", "0.0.0.0",
         "--port", "8000",
         "--log-level", "info"
