@@ -31,7 +31,7 @@ resource "aws_cloudfront_distribution" "saburo_distribution" {
     viewer_protocol_policy = "redirect-to-https"
 
     # キャッシュポリシーの設定
-    cache_policy_id = data.aws_cloudfront_cache_policy.caching_optimized.id # CachingOptimized
+    cache_policy_id = data.aws_cloudfront_cache_policy.caching_optimized.id
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_custom_origin.id
   }
 
@@ -71,6 +71,6 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
 }
 
 # CloudFront オリジンリクエストポリシーの定義
-data "aws_cloudfront_origin_request_policy" "none" {
-  name = "Managed-CORS-S3Origin"
+data "aws_cloudfront_origin_request_policy" "cors_custom_origin" {
+  name = "Managed-CORS-CustomOrigin"
 }
