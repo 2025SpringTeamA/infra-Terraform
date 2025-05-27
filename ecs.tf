@@ -88,6 +88,30 @@ resource "aws_iam_role_policy_attachment" "ecs_task_role_ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+# Bedrock 用のポリシーを作成
+resource "aws_iam_policy" "ecs_bedrock_policy" {
+  name = "${var.project_prefix}-ecs-bedrock-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "bedrock:ListFoundationModels"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# ECS タスクロールに Bedrock ポリシーをアタッチ
+resource "aws_iam_role_policy_attachment" "ecs_task_role_bedrock" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = aws_iam_policy.ecs_bedrock_policy.arn
+}
+
 # ECS タスク定義（Fargate: init-datadog → datadog-agent → DB Migration → FastAPI App）
 resource "aws_ecs_task_definition" "main" {
   family                   = "${var.project_prefix}-saburo-app-task"
