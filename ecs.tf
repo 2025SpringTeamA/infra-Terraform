@@ -164,11 +164,26 @@ resource "aws_ecs_task_definition" "main" {
       entryPoint     = ["/bin/sh", "-c"],
       command        = ["cd /app && alembic upgrade head"],
       secrets = [
-        { name = "MYSQL_ROOT_PASSWORD", valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_ROOT_PASSWORD::" },
-        { name = "MYSQL_DATABASE", valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_DATABASE::" },
-        { name = "MYSQL_USER",     valueFrom =  "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_USER::" },
-        { name = "MYSQL_PASSWORD", valueFrom =  "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_PASSWORD::" },
-        { name = "DATABASE_URL",   valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:DATABASE_URL::" }
+        { 
+          name = "MYSQL_ROOT_PASSWORD", 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_ROOT_PASSWORD::" 
+        },
+        { 
+          name = "MYSQL_DATABASE", 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_DATABASE::" 
+        },
+        { 
+          name = "MYSQL_USER",     
+          valueFrom =  "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_USER::"       
+        },
+        { 
+          name = "MYSQL_PASSWORD", 
+          valueFrom =  "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_PASSWORD::" 
+        },
+        { 
+          name = "DATABASE_URL",   
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:DATABASE_URL::" 
+        }
       ],
       dependsOn = [
         {
@@ -189,12 +204,41 @@ resource "aws_ecs_task_definition" "main" {
       name  = "fastapi-app",
       image = "${var.ecr_image_uri}:latest",
       essential = true,
-
       secrets = [
         { 
-          name      = "ADMIN_PIN_CODE",
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/backend-credentials-xxxxxx:ADMIN_PIN_CODE::"
-        }
+          name = "MYSQL_DATABASE",       
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_DATABASE::" 
+        },
+        { 
+          name = "MYSQL_USER",           
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_USER::" 
+        },
+        { 
+          name = "MYSQL_PASSWORD",       
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_PASSWORD::" 
+        },
+        { 
+          name = "MYSQL_ROOT_PASSWORD",  
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_ROOT_PASSWORD::" 
+        },
+        { 
+          name = "DATABASE_URL",         
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:DATABASE_URL::" 
+        },
+        { 
+          name = "ADMIN_PIN_CODE",       
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:ADMIN_PIN_CODE::" 
+        },
+        { 
+          name = "SECRET_KEY",           
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:SECRET_KEY::" 
+        },
+        { name = "OPENAI_API_KEY",       
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:OPENAI_API_KEY::" 
+        },
+        { name = "OPENAI_MODEL",         
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:OPENAI_MODEL::" 
+        }                    
       ],
       portMappings = [
         {
