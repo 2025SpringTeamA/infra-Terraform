@@ -6,11 +6,12 @@
 terraform/
 ├── alb.tf                 # Application Load Balancer関連の設定
 ├── cloudfront.tf          # CloudFrontの設定
-├── ecr.tf                 # ECRの設定
 ├── ecs.tf                 # ECSクラスターやサービス定義
 ├── internet_gateway.tf    # インターネットゲートウェイの設定
+├── lambda.tf              # lambdaの設定
 ├── main.tf                # メイン設定ファイル（entry point）
 ├── nat_gateway.tf         # NATゲートウェイの設定
+├── outputs.tf             # 出力値を定義
 ├── provider.tf            # プロバイダー（例：AWS）定義
 ├── rds.tf                 # RDSインスタンスの設定
 ├── README.md              # プロジェクトの概要や使用方法など
