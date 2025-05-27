@@ -318,6 +318,42 @@ resource "aws_ecs_task_definition" "main" {
   }
 }
 
+# MySQL接続確認用のタスク定義（RunTask用）
+resource "aws_ecs_task_definition" "mysql_client" {
+  family                   = "${var.project_prefix}-mysql-client"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name  = "mysql-client",
+      image = "mysql:8.0",
+      essential = true,
+      entryPoint = ["/bin/sh", "-c"],
+      command    = ["sleep 3600"],
+      secrets = [
+        { name = "MYSQL_DATABASE",       valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_DATABASE::" },
+        { name = "MYSQL_USER",           valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_USER::" },
+        { name = "MYSQL_PASSWORD",       valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_PASSWORD::" },
+        { name = "MYSQL_ROOT_PASSWORD",  valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_ROOT_PASSWORD::" },
+        { name = "DATABASE_URL",         valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:DATABASE_URL::" }
+      ],
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = "/ecs/datadog",
+          awslogs-region        = "ap-northeast-1",
+          awslogs-stream-prefix = "mysql-client"
+        }
+      }
+    }
+  ])
+}
+
 # ECS サービスの定義（Fargate でアプリケーションを実行し、ALB に登録）
 resource "aws_ecs_service" "main" {
   name            = "${var.project_prefix}-ecs-service"
