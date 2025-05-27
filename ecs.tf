@@ -326,6 +326,9 @@ resource "aws_ecs_service" "main" {
   desired_count   = 1
   launch_type     = "FARGATE"
 
+  # ECS Exec を有効化
+  enable_execute_command = true
+
   # サブネットとセキュリティグループの指定（プライベートサブネットで実行）
   network_configuration {
     subnets         = [aws_subnet.private1.id, aws_subnet.private2.id]
