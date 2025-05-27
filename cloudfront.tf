@@ -32,7 +32,7 @@ resource "aws_cloudfront_distribution" "saburo_distribution" {
 
     # キャッシュポリシーの設定
     cache_policy_id = data.aws_cloudfront_cache_policy.caching_optimized.id # CachingOptimized
-    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.none.id  # None (no query/header
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_custom_origin.id
   }
 
   # カスタムエラーレスポンス（メンテナンス用）
