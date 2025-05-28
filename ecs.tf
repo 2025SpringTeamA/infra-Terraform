@@ -262,7 +262,13 @@ resource "aws_ecs_task_definition" "main" {
         },
         { name = "OPENAI_MODEL",         
           valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:OPENAI_MODEL::" 
-        }                    
+        },
+        { name = "AWS_ACCESS_KEY_ID",         
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/datadog:AWS_ACCESS_KEY_ID::" 
+        },
+        { name = "AWS_SECRET_ACCESS_KEY",         
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/datadog:AWS_SECRET_ACCESS_KEY::" 
+        }
       ],
       portMappings = [
         {
