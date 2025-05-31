@@ -1,10 +1,7 @@
-# CloudFront ディストリビューションの定義  
-# OAC（オリジンアクセスコントロール）を使用して、S3 バケットへのセキュアなアクセスを構成
-
-# CloudFront OAC の定義
+# CloudFront OAC の定義（S3とセキュア連携するため）
 resource "aws_cloudfront_origin_access_control" "frontend_oac" {
   name                              = "${var.project_prefix}-frontend-oac"
-  description                       = "OAC for saburo-frontend S3 bucket access"  
+  description                       = "OAC for saburo-frontend S3 bucket access"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -18,7 +15,7 @@ resource "aws_cloudfront_origin_access_control" "maintenance_oac" {
   signing_protocol                  = "sigv4"
 }
 
-# CloudFront ディストリビューションの定義
+# CloudFront ディストリビューション
 resource "aws_cloudfront_distribution" "saburo_distribution" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -39,36 +36,54 @@ resource "aws_cloudfront_distribution" "saburo_distribution" {
     origin_access_control_id = aws_cloudfront_origin_access_control.maintenance_oac.id
   }
 
+  # デフォルトルート（トップページ用）
   default_cache_behavior {
     target_origin_id       = "${var.project_prefix}-saburo-frontend-origin"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
     viewer_protocol_policy = "redirect-to-https"
 
-    # キャッシュポリシーの設定
     cache_policy_id          = data.aws_cloudfront_cache_policy.caching_optimized.id
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_custom_origin.id
   }
 
-  # カスタムエラーレスポンス（メンテナンス用）
-  custom_error_response {
-    response_code         = 200
-    error_code            = 503
-    response_page_path    = "/503.html"
-    error_caching_min_ttl = 60
-  }
-
-  # カスタムエラーページ（/503.html）を saburo-maintenance バケットから配信するためのルーティング設定
+  # beautiful-woman-mode 用ビヘイビア
   ordered_cache_behavior {
-    path_pattern            = "/503.html"
-    target_origin_id        = "${var.project_prefix}-saburo-maintenance-origin"
-    allowed_methods         = ["GET", "HEAD"]
-    cached_methods          = ["GET", "HEAD"]
-    viewer_protocol_policy  = "redirect-to-https"
+    path_pattern           = "/beautiful-woman-mode/*"
+    target_origin_id       = "${var.project_prefix}-saburo-frontend-origin"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    viewer_protocol_policy = "redirect-to-https"
 
-    # キャッシュポリシーの設定
     cache_policy_id          = data.aws_cloudfront_cache_policy.caching_optimized.id
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_custom_origin.id
+  }
+
+  # sabutyan-mode 用ビヘイビア
+  ordered_cache_behavior {
+    path_pattern           = "/sabutyan-mode/*"
+    target_origin_id       = "${var.project_prefix}-saburo-frontend-origin"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    viewer_protocol_policy = "redirect-to-https"
+
+    cache_policy_id          = data.aws_cloudfront_cache_policy.caching_optimized.id
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_custom_origin.id
+  }
+
+  # 🔻 共通のSPAルート対応（403/404時は /index.html を返す）
+  custom_error_response {
+    error_code            = 403
+    response_code         = 200
+    response_page_path    = "/index.html"
+    error_caching_min_ttl = 0
+  }
+
+  custom_error_response {
+    error_code            = 404
+    response_code         = 200
+    response_page_path    = "/index.html"
+    error_caching_min_ttl = 0
   }
 
   restrictions {
@@ -91,12 +106,12 @@ resource "aws_cloudfront_distribution" "saburo_distribution" {
   }
 }
 
-# CloudFront キャッシュポリシーの定義
+# キャッシュポリシー（CloudFrontマネージド）
 data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
-# CloudFront オリジンリクエストポリシーの定義
+# オリジンリクエストポリシー（CloudFrontマネージド）
 data "aws_cloudfront_origin_request_policy" "cors_custom_origin" {
   name = "Managed-CORS-CustomOrigin"
 }
