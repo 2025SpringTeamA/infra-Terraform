@@ -50,7 +50,7 @@ resource "aws_iam_policy" "lambda_ecs_policy" {
         Action = "iam:PassRole",
         Resource = [
           "arn:aws:iam::${data.aws_caller_identity.lambda.account_id}:role/${var.project_prefix}-ecs-task-role",
-          "arn:aws:iam::${data.aws_caller_identity.lambdat.account_id}:role/${var.project_prefix}-ecs-task-execution-role"
+          "arn:aws:iam::${data.aws_caller_identity.lambda.account_id}:role/${var.project_prefix}-ecs-task-execution-role"
         ]
       }
     ]
