@@ -1,0 +1,23 @@
+# Terraform state
+terraform.tfstate
+terraform.tfstate.backup
+
+# Terraform lock file
+.terraform.lock.hcl
+
+# Terraform modules and providers
+.terraform/
+
+# Plan output
+*.tfplan
+
+# Lambda zip artifacts
+lambda/*.zip
+
+# Editor config
+.vscode/
+.idea/
+
+# OSファイル
+.DS_Store
+Thumbs.db
