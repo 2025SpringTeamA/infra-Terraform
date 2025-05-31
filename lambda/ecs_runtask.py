@@ -1,5 +1,6 @@
 import os
 import boto3
+import json
 
 def lambda_handler(event, context):
     ecs = boto3.client('ecs')
@@ -18,4 +19,14 @@ def lambda_handler(event, context):
     )
 
     print("Task started successfully:", response)
-    return { "status": "invoked", "detail": response}
+
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": json.dumps({
+            "status": "invoked",
+            "detail": response
+        }, default=str)
+    }
