@@ -21,24 +21,6 @@ resource "aws_route53_record" "saburo_cloudfront_primary" {
   }
 }
 
-# # Route 53 に メンテナンス用 S3 のA レコード（Secondary）
-# resource "aws_route53_record" "maintenance_failover" {
-#   zone_id = data.aws_route53_zone.saburo.zone_id
-#   name    = "saburo.xyz"
-#   type    = "A"
-#   set_identifier = "maintenance-backup"
-
-#   alias {
-#     name                   = aws_cloudfront_distribution.maintenance_distribution.domain_name
-#     zone_id                = aws_cloudfront_distribution.maintenance_distribution.hosted_zone_id
-#     evaluate_target_health = false
-#   }
-
-#   failover_routing_policy {
-#     type = "SECONDARY"
-#   }
-# }
-
 # API サブドメイン用の Route53 レコード
 resource "aws_route53_record" "api_subdomain" {
   zone_id = data.aws_route53_zone.saburo.zone_id
