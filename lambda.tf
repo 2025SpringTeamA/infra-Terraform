@@ -1,5 +1,5 @@
 # AWSアカウントIDを取得（ロールARNを構築するため）
-data "aws_caller_identity" "current" {}
+data "aws_caller_identity" "lambda" {}
 
 # Lambda用IAMロール（ECS RunTask実行用）
 resource "aws_iam_role" "lambda_execution_role" {
@@ -49,8 +49,8 @@ resource "aws_iam_policy" "lambda_ecs_policy" {
         Effect = "Allow",
         Action = "iam:PassRole",
         Resource = [
-          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_prefix}-ecs-task-role",
-          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_prefix}-ecs-task-execution-role"
+          "arn:aws:iam::${data.aws_caller_identity.lambda.account_id}:role/${var.project_prefix}-ecs-task-role",
+          "arn:aws:iam::${data.aws_caller_identity.lambdat.account_id}:role/${var.project_prefix}-ecs-task-execution-role"
         ]
       }
     ]

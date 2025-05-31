@@ -2,10 +2,10 @@
 # クラスター、タスク実行ロール、タスク定義、サービスの構成
 
 # AWSアカウントIDを動的に取得
-data "aws_caller_identity" "current" {}
+data "aws_caller_identity" "ecs" {}
 
 locals {
-  account_id = data.aws_caller_identity.current.account_id
+  account_id = data.aws_caller_identity.ecs.account_id
 }
 
 # CloudWatch Logs グループの定義
