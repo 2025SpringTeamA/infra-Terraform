@@ -3,35 +3,50 @@
 
 # CloudFront OAC の定義
 resource "aws_cloudfront_origin_access_control" "frontend_oac" {
-  name                       = "${var.project_prefix}-frontend-oac"
-  description                = "OAC for saburo-frontend S3 bucket access"  
+  name                              = "${var.project_prefix}-frontend-oac"
+  description                       = "OAC for saburo-frontend S3 bucket access"  
   origin_access_control_origin_type = "s3"
-  signing_behavior           = "always"
-  signing_protocol           = "sigv4"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+resource "aws_cloudfront_origin_access_control" "maintenance_oac" {
+  name                              = "${var.project_prefix}-maintenance-oac"
+  description                       = "OAC for saburo-maintenance S3 bucket access"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
 }
 
 # CloudFront ディストリビューションの定義
 resource "aws_cloudfront_distribution" "saburo_distribution" {
-  origin {
-    domain_name              = aws_s3_bucket.frontend_bucket.bucket_regional_domain_name
-    origin_id                = "${var.project_prefix}-saburo-frontend-origin"
-
-    origin_access_control_id = aws_cloudfront_origin_access_control.frontend_oac.id
-  }
-
   enabled             = true
   is_ipv6_enabled     = true
   comment             = "CloudFront distribution for saburo.xyz"
   default_root_object = "index.html"
 
+  aliases = ["saburo.xyz"]
+
+  origin {
+    domain_name              = aws_s3_bucket.frontend_bucket.bucket_regional_domain_name
+    origin_id                = "${var.project_prefix}-saburo-frontend-origin"
+    origin_access_control_id = aws_cloudfront_origin_access_control.frontend_oac.id
+  }
+
+  origin {
+    domain_name              = aws_s3_bucket.maintenance_bucket.bucket_regional_domain_name
+    origin_id                = "${var.project_prefix}-saburo-maintenance-origin"
+    origin_access_control_id = aws_cloudfront_origin_access_control.maintenance_oac.id
+  }
+
   default_cache_behavior {
-    target_origin_id = "${var.project_prefix}-saburo-frontend-origin"
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
+    target_origin_id       = "${var.project_prefix}-saburo-frontend-origin"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
     viewer_protocol_policy = "redirect-to-https"
 
     # キャッシュポリシーの設定
-    cache_policy_id = data.aws_cloudfront_cache_policy.caching_optimized.id
+    cache_policy_id          = data.aws_cloudfront_cache_policy.caching_optimized.id
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_custom_origin.id
   }
 
@@ -41,6 +56,19 @@ resource "aws_cloudfront_distribution" "saburo_distribution" {
     error_code            = 503
     response_page_path    = "/503.html"
     error_caching_min_ttl = 60
+  }
+
+  # カスタムエラーページ（/503.html）を saburo-maintenance バケットから配信するためのルーティング設定
+  ordered_cache_behavior {
+    path_pattern            = "/503.html"
+    target_origin_id        = "${var.project_prefix}-saburo-maintenance-origin"
+    allowed_methods         = ["GET", "HEAD"]
+    cached_methods          = ["GET", "HEAD"]
+    viewer_protocol_policy  = "redirect-to-https"
+
+    # キャッシュポリシーの設定
+    cache_policy_id          = data.aws_cloudfront_cache_policy.caching_optimized.id
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_custom_origin.id
   }
 
   restrictions {
@@ -56,8 +84,6 @@ resource "aws_cloudfront_distribution" "saburo_distribution" {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
-
-  aliases = ["saburo.xyz"]
 
   tags = {
     Name        = "${var.project_prefix}-saburo-cloudfront"
