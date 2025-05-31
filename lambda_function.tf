@@ -1,3 +1,15 @@
+# 必要なリソースから値を取得して変数に代入（変数を使わず、localsで管理）
+locals {
+  ecs_cluster_name         = aws_ecs_cluster.main.name
+  ecs_task_definition_name = aws_ecs_task_definition.main.family
+  private_subnet_ids       = [
+    aws_subnet.private1.id,
+    aws_subnet.private2.id,
+    aws_subnet.private3.id,
+    aws_subnet.private4.id
+  ]
+}
+
 # Lambda 関数を zip ファイルからデプロイする定義
 resource "aws_lambda_function" "ecs_runtask_lambda" {
   function_name = var.lambda_function_name
