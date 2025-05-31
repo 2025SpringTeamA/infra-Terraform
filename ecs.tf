@@ -1,6 +1,13 @@
 # ECS 関連リソースの定義  
 # クラスター、タスク実行ロール、タスク定義、サービスの構成
 
+# AWSアカウントIDを動的に取得
+data "aws_caller_identity" "current" {}
+
+locals {
+  account_id = data.aws_caller_identity.current.account_id
+}
+
 # CloudWatch Logs グループの定義
 resource "aws_cloudwatch_log_group" "ecs_logs" {
   name              = "/ecs/datadog"
@@ -151,7 +158,7 @@ resource "aws_ecs_task_definition" "main" {
   secrets = [
     { 
       name      = "DD_API_KEY", 
-      valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/datadog-IQUsil:DD_API_KEY::" 
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/datadog-IQUsil:DD_API_KEY::" 
     }
   ],
   environment = [
@@ -190,23 +197,23 @@ resource "aws_ecs_task_definition" "main" {
       secrets = [
         { 
           name = "MYSQL_ROOT_PASSWORD", 
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_ROOT_PASSWORD::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_ROOT_PASSWORD::" 
         },
         { 
           name = "MYSQL_DATABASE", 
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_DATABASE::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_DATABASE::" 
         },
         { 
           name = "MYSQL_USER",     
-          valueFrom =  "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_USER::"       
+          valueFrom =  "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_USER::"       
         },
         { 
           name = "MYSQL_PASSWORD", 
-          valueFrom =  "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_PASSWORD::" 
+          valueFrom =  "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials-4w84iT:MYSQL_PASSWORD::" 
         },
         { 
           name = "DATABASE_URL",   
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials-4w84iT:DATABASE_URL::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials-4w84iT:DATABASE_URL::" 
         }
       ],
       dependsOn = [
@@ -231,43 +238,43 @@ resource "aws_ecs_task_definition" "main" {
       secrets = [
         { 
           name = "MYSQL_DATABASE",       
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_DATABASE::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:MYSQL_DATABASE::" 
         },
         { 
           name = "MYSQL_USER",           
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_USER::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:MYSQL_USER::" 
         },
         { 
           name = "MYSQL_PASSWORD",       
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_PASSWORD::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:MYSQL_PASSWORD::" 
         },
         { 
           name = "MYSQL_ROOT_PASSWORD",  
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_ROOT_PASSWORD::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:MYSQL_ROOT_PASSWORD::" 
         },
         { 
           name = "DATABASE_URL",         
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:DATABASE_URL::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:DATABASE_URL::" 
         },
         { 
           name = "ADMIN_PIN_CODE",       
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:ADMIN_PIN_CODE::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:ADMIN_PIN_CODE::" 
         },
         { 
           name = "SECRET_KEY",           
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:SECRET_KEY::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:SECRET_KEY::" 
         },
         { name = "OPENAI_API_KEY",       
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:OPENAI_API_KEY::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:OPENAI_API_KEY::" 
         },
         { name = "OPENAI_MODEL",         
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:OPENAI_MODEL::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:OPENAI_MODEL::" 
         },
         { name = "AWS_ACCESS_KEY_ID",         
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/datadog:AWS_ACCESS_KEY_ID::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/datadog:AWS_ACCESS_KEY_ID::" 
         },
         { name = "AWS_SECRET_ACCESS_KEY",         
-          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/datadog:AWS_SECRET_ACCESS_KEY::" 
+          valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/datadog:AWS_SECRET_ACCESS_KEY::" 
         }
       ],
       portMappings = [
@@ -342,11 +349,11 @@ resource "aws_ecs_task_definition" "mysql_client" {
       entryPoint = ["/bin/sh", "-c"],
       command    = ["sleep 3600"],
       secrets = [
-        { name = "MYSQL_DATABASE",       valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_DATABASE::" },
-        { name = "MYSQL_USER",           valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_USER::" },
-        { name = "MYSQL_PASSWORD",       valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_PASSWORD::" },
-        { name = "MYSQL_ROOT_PASSWORD",  valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:MYSQL_ROOT_PASSWORD::" },
-        { name = "DATABASE_URL",         valueFrom = "arn:aws:secretsmanager:ap-northeast-1:881490128743:secret:prod/saburo-fastapi/db-credentials:DATABASE_URL::" }
+        { name = "MYSQL_DATABASE",       valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:MYSQL_DATABASE::" },
+        { name = "MYSQL_USER",           valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:MYSQL_USER::" },
+        { name = "MYSQL_PASSWORD",       valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:MYSQL_PASSWORD::" },
+        { name = "MYSQL_ROOT_PASSWORD",  valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:MYSQL_ROOT_PASSWORD::" },
+        { name = "DATABASE_URL",         valueFrom = "arn:aws:secretsmanager:ap-northeast-1:${local.account_id}:secret:prod/saburo-fastapi/db-credentials:DATABASE_URL::" }
       ],
       logConfiguration = {
         logDriver = "awslogs",
