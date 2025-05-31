@@ -54,3 +54,21 @@ variable "lambda_function_name" {
   description = "Lambda function name for DB migration trigger"
   default     = "db-migration-trigger"
 }
+
+# Lambda が参照する ECS クラスタ名
+variable "ecs_cluster_name" {
+  description = "ECSクラスタ名（LambdaからRunTaskを実行するために使用）"
+  type        = string
+}
+
+# Lambda が起動する ECS タスク定義名
+variable "ecs_task_definition_name" {
+  description = "ECSタスク定義名（LambdaからRunTaskを実行するために使用）"
+  type        = string
+}
+
+# Lambda が RunTask を実行する際のプライベートサブネット
+variable "private_subnet_ids" {
+  description = "ECS RunTask に使用するプライベートサブネットIDのリスト"
+  type        = list(string)
+}
