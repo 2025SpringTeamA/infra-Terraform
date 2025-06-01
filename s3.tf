@@ -38,7 +38,7 @@ resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid = "AllowCloudFrontServicPrincipal",
+        Sid = "AllowCloudFrontServicePrincipal",
         Effect = "Allow",
         Principal = {
           Service = "cloudfront.amazonaws.com"
@@ -47,10 +47,36 @@ resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
         Resource = "${aws_s3_bucket.frontend_bucket.arn}/*"
         Condition = {
           StringEquals = {
-            "AWS:SourceArn" = "${aws_cloudfront_distribution.saburo_distribution.arn}"
+            "AWS:SourceArn" = aws_cloudfront_distribution.saburo_distribution.arn
           }
         }      
       }
     ]
   })
+}
+
+# CORS設定（フロントエンド用）
+resource "aws_s3_bucket_cors_configuration" "frontend_bucket_cors" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD"]
+    allowed_origins = ["https://saburo.xyz", "https://*.cloudfront.net"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
+# 静的ウェブサイトホスティング設定（フロントエンド用）- SPA対応
+resource "aws_s3_bucket_website_configuration" "frontend_bucket_website" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "index.html"
+  }
 }
