@@ -21,3 +21,23 @@ output "lambda_execution_role_arn" {
   description = "Lambda execution role ARN"
   value       = aws_iam_role.lambda_execution_role.arn
 }
+
+output "cloudfront_distribution_id" {
+  description = "CloudFront Distribution ID for cache invalidation"
+  value       = aws_cloudfront_distribution.saburo_distribution.id
+}
+
+output "cloudfront_domain_name" {
+  description = "CloudFront Distribution domain name"
+  value       = aws_cloudfront_distribution.saburo_distribution.domain_name
+}
+
+output "s3_frontend_bucket_name" {
+  description = "S3 frontend bucket name for deployment"
+  value       = aws_s3_bucket.frontend_bucket.bucket
+}
+
+output "s3_maintenance_bucket_name" {
+  description = "S3 maintenance bucket name"
+  value       = aws_s3_bucket.maintenance_bucket.bucket
+}
